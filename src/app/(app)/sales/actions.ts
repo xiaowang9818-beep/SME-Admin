@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { writeAudit } from "@/lib/audit";
 
 export async function shipOrder(formData: FormData) {
   const orderId = String(formData.get("orderId") || "");
@@ -48,6 +49,13 @@ export async function shipOrder(formData: FormData) {
     data: { status: "SHIPPED" },
   });
 
+  await writeAudit({
+    action: "销售发货",
+    entity: "SalesOrder",
+    entityId: orderId,
+    userName: "系统",
+  });
+
   revalidatePath("/sales");
   revalidatePath("/inventory");
   revalidatePath("/dashboard");
@@ -68,6 +76,13 @@ export async function markSalesPaid(formData: FormData) {
     },
   });
 
+  await writeAudit({
+    action: "标记已收款",
+    entity: "SalesOrder",
+    entityId: orderId,
+    userName: "系统",
+  });
+
   revalidatePath("/sales");
   revalidatePath("/finance");
 }
@@ -79,6 +94,13 @@ export async function cancelSalesOrder(formData: FormData) {
   await prisma.salesOrder.update({
     where: { id: orderId },
     data: { status: "CANCELLED" },
+  });
+
+  await writeAudit({
+    action: "作废销售订单",
+    entity: "SalesOrder",
+    entityId: orderId,
+    userName: "系统",
   });
 
   revalidatePath("/sales");

@@ -2,12 +2,13 @@
 
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import { writeAudit } from "@/lib/audit";
 
 export async function createCustomer(formData: FormData) {
   const name = String(formData.get("name") || "").trim();
   if (!name) return;
 
-  await prisma.customer.create({
+  const customer = await prisma.customer.create({
     data: {
       name,
       contact: String(formData.get("contact") || "") || null,
@@ -17,6 +18,13 @@ export async function createCustomer(formData: FormData) {
       level: (formData.get("level") as any) || "C",
       remark: String(formData.get("remark") || "") || null,
     },
+  });
+
+  await writeAudit({
+    action: "创建客户",
+    entity: "Customer",
+    entityId: customer.id,
+    userName: "系统",
   });
 
   redirect("/customers");

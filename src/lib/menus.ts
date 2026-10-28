@@ -16,6 +16,7 @@ export const MENUS: MenuItem[] = [
   { href: "/employees", label: "员工", roles: ["BOSS", "HR"] },
   { href: "/announcements", label: "公告", roles: ["BOSS", "HR"] },
   { href: "/reports", label: "报表", roles: ["BOSS", "FINANCE"] },
+  { href: "/logs", label: "操作日志", roles: ["BOSS"] },
 ];
 
 export function getMenusForRole(role?: string | null) {

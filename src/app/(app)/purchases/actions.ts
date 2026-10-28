@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { writeAudit } from "@/lib/audit";
 
 export async function receivePurchase(formData: FormData) {
   const orderId = String(formData.get("orderId") || "");
@@ -56,6 +57,13 @@ export async function receivePurchase(formData: FormData) {
     data: { status: "RECEIVED" },
   });
 
+  await writeAudit({
+    action: "采购入库",
+    entity: "PurchaseOrder",
+    entityId: orderId,
+    userName: "系统",
+  });
+
   revalidatePath("/purchases");
   revalidatePath("/inventory");
   revalidatePath("/dashboard");
@@ -74,6 +82,13 @@ export async function markPurchasePaid(formData: FormData) {
       paidAmount: order.totalAmount,
       paymentStatus: "PAID",
     },
+  });
+
+  await writeAudit({
+    action: "标记已付款",
+    entity: "PurchaseOrder",
+    entityId: orderId,
+    userName: "系统",
   });
 
   revalidatePath("/purchases");
