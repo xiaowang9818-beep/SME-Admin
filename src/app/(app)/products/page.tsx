@@ -12,9 +12,14 @@ export default async function ProductsPage() {
     <div>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">商品管理</h1>
-        <Link href="/products/new" className="rounded-lg bg-black px-4 py-2 text-sm text-white">
-          新建商品
-        </Link>
+        <div className="flex gap-2">
+          <a href="/api/export/products" className="rounded-lg border px-4 py-2 text-sm">
+            导出 Excel
+          </a>
+          <Link href="/products/new" className="rounded-lg bg-black px-4 py-2 text-sm text-white">
+            新建商品
+          </Link>
+        </div>
       </div>
 
       <div className="mt-4 overflow-hidden rounded-2xl border bg-white">
