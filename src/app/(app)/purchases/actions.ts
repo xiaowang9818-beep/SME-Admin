@@ -60,3 +60,22 @@ export async function receivePurchase(formData: FormData) {
   revalidatePath("/inventory");
   revalidatePath("/dashboard");
 }
+
+export async function markPurchasePaid(formData: FormData) {
+  const orderId = String(formData.get("orderId") || "");
+  if (!orderId) return;
+
+  const order = await prisma.purchaseOrder.findUnique({ where: { id: orderId } });
+  if (!order) return;
+
+  await prisma.purchaseOrder.update({
+    where: { id: orderId },
+    data: {
+      paidAmount: order.totalAmount,
+      paymentStatus: "PAID",
+    },
+  });
+
+  revalidatePath("/purchases");
+  revalidatePath("/finance");
+}

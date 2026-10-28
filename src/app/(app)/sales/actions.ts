@@ -23,10 +23,7 @@ export async function shipOrder(formData: FormData) {
       },
     });
 
-    if (!stock || stock.quantity < line.quantity) {
-      // 库存不足，跳过
-      continue;
-    }
+    if (!stock || stock.quantity < line.quantity) continue;
 
     await prisma.stockItem.update({
       where: { id: stock.id },
@@ -54,4 +51,23 @@ export async function shipOrder(formData: FormData) {
   revalidatePath("/sales");
   revalidatePath("/inventory");
   revalidatePath("/dashboard");
+}
+
+export async function markSalesPaid(formData: FormData) {
+  const orderId = String(formData.get("orderId") || "");
+  if (!orderId) return;
+
+  const order = await prisma.salesOrder.findUnique({ where: { id: orderId } });
+  if (!order) return;
+
+  await prisma.salesOrder.update({
+    where: { id: orderId },
+    data: {
+      paidAmount: order.totalAmount,
+      paymentStatus: "PAID",
+    },
+  });
+
+  revalidatePath("/sales");
+  revalidatePath("/finance");
 }
