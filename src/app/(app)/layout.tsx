@@ -3,6 +3,7 @@ import Link from "next/link";
 const menus = [
   { href: "/dashboard", label: "工作台" },
   { href: "/customers", label: "客户" },
+  { href: "/suppliers", label: "供应商" },
   { href: "/products", label: "商品" },
   { href: "/sales", label: "销售订单" },
   { href: "/purchases", label: "采购订单" },
