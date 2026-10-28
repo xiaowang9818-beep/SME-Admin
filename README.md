@@ -15,4 +15,15 @@ npm run dev
 
 访问：http://127.0.0.1:3000
 
-演示账号：boss@example.com / Boss123456!
+## 演示账号
+
+| 角色 | 邮箱 | 密码 |
+|------|------|------|
+| 老板 | boss@example.com | Boss123456! |
+| 销售 | sales@example.com | Sales123456! |
+| 采购 | purchase@example.com | Purchase123456! |
+| 仓库 | warehouse@example.com | Warehouse123456! |
+| 财务 | finance@example.com | Finance123456! |
+| 人事 | hr@example.com | Hr123456! |
+
+登录页可直接点击对应角色快速登录。

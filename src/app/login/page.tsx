@@ -1,5 +1,14 @@
 import { signIn } from "@/auth";
 
+const demoAccounts = [
+  { email: "boss@example.com", password: "Boss123456!", label: "老板" },
+  { email: "sales@example.com", password: "Sales123456!", label: "销售" },
+  { email: "purchase@example.com", password: "Purchase123456!", label: "采购" },
+  { email: "warehouse@example.com", password: "Warehouse123456!", label: "仓库" },
+  { email: "finance@example.com", password: "Finance123456!", label: "财务" },
+  { email: "hr@example.com", password: "Hr123456!", label: "人事" },
+];
+
 export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-100">
@@ -41,9 +50,28 @@ export default function LoginPage() {
           <button className="mt-4 w-full rounded-full bg-black py-3 text-white">登录</button>
         </form>
 
-        <p className="mt-4 text-center text-xs text-slate-400">
-          演示账号：boss@example.com / Boss123456!
-        </p>
+        <div className="mt-6">
+          <div className="text-xs text-slate-400">演示账号（点击填充）</div>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {demoAccounts.map((acc) => (
+              <form
+                key={acc.email}
+                action={async () => {
+                  "use server";
+                  await signIn("credentials", {
+                    email: acc.email,
+                    password: acc.password,
+                    redirectTo: "/dashboard",
+                  });
+                }}
+              >
+                <button className="rounded-full border px-3 py-1 text-xs hover:bg-slate-50">
+                  {acc.label}
+                </button>
+              </form>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

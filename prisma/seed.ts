@@ -3,25 +3,36 @@ import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
+const accounts = [
+  { email: "boss@example.com", name: "老板", role: "BOSS", password: "Boss123456!" },
+  { email: "sales@example.com", name: "销售", role: "SALES", password: "Sales123456!" },
+  { email: "purchase@example.com", name: "采购", role: "PURCHASE", password: "Purchase123456!" },
+  { email: "warehouse@example.com", name: "仓库", role: "WAREHOUSE", password: "Warehouse123456!" },
+  { email: "finance@example.com", name: "财务", role: "FINANCE", password: "Finance123456!" },
+  { email: "hr@example.com", name: "人事", role: "HR", password: "Hr123456!" },
+];
+
 async function main() {
-  const passwordHash = await bcrypt.hash("Boss123456!", 10);
+  for (const acc of accounts) {
+    const role = await prisma.role.upsert({
+      where: { code: acc.role as any },
+      update: {},
+      create: { code: acc.role as any, name: acc.name },
+    });
 
-  const bossRole = await prisma.role.upsert({
-    where: { code: "BOSS" },
-    update: {},
-    create: { code: "BOSS", name: "老板", description: "全部权限" },
-  });
+    const passwordHash = await bcrypt.hash(acc.password, 10);
 
-  await prisma.user.upsert({
-    where: { email: "boss@example.com" },
-    update: {},
-    create: {
-      email: "boss@example.com",
-      name: "老板",
-      passwordHash,
-      roleId: bossRole.id,
-    },
-  });
+    await prisma.user.upsert({
+      where: { email: acc.email },
+      update: { passwordHash },
+      create: {
+        email: acc.email,
+        name: acc.name,
+        passwordHash,
+        roleId: role.id,
+      },
+    });
+  }
 
   const warehouse = await prisma.warehouse.upsert({
     where: { id: "main-wh" },
