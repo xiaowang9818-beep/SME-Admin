@@ -11,6 +11,7 @@ const menus = [
   { href: "/finance", label: "财务" },
   { href: "/employees", label: "员工" },
   { href: "/announcements", label: "公告" },
+  { href: "/reports", label: "报表" },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
