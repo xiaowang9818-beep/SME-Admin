@@ -9,6 +9,8 @@ const menus = [
   { href: "/purchases", label: "采购订单" },
   { href: "/inventory", label: "库存" },
   { href: "/finance", label: "财务" },
+  { href: "/employees", label: "员工" },
+  { href: "/announcements", label: "公告" },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {

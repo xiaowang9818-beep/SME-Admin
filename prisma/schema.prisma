@@ -58,6 +58,11 @@ enum PaymentStatus {
   PAID
 }
 
+enum EmployeeStatus {
+  ACTIVE
+  LEFT
+}
+
 model User {
   id           String     @id @default(cuid())
   email        String     @unique
@@ -147,8 +152,8 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  stockItems StockItem[]
-  salesLines SalesOrderLine[]
+  stockItems    StockItem[]
+  salesLines    SalesOrderLine[]
   purchaseLines PurchaseOrderLine[]
 }
 
@@ -248,6 +253,19 @@ model PurchaseOrderLine {
 
   order   PurchaseOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product       @relation(fields: [productId], references: [id])
+}
+
+model Employee {
+  id         String         @id @default(cuid())
+  name       String
+  department String?
+  phone      String?
+  position   String?
+  status     EmployeeStatus @default(ACTIVE)
+  hireDate   DateTime?
+  remark     String?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
 }
 
 model Announcement {
