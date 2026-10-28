@@ -1,14 +1,27 @@
-export default function DashboardPage() {
+import { prisma } from "@/lib/prisma";
+
+export default async function DashboardPage() {
+  const [customerCount, productCount, orderCount, stockItems] = await Promise.all([
+    prisma.customer.count(),
+    prisma.product.count(),
+    prisma.salesOrder.count(),
+    prisma.stockItem.findMany({ include: { product: true } }),
+  ]);
+
+  const totalStock = stockItems.reduce((s, i) => s + i.quantity, 0);
+  const lowStock = stockItems.filter((i) => i.quantity < i.product.safetyStock).length;
+
   return (
     <div>
       <h1 className="text-2xl font-semibold">工作台</h1>
-      <p className="mt-1 text-slate-500">通用企业管理系统 V1</p>
+      <p className="mt-1 text-slate-500">通用企业管理系统</p>
+
       <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
         {[
-          { label: "客户数", value: "1" },
-          { label: "商品数", value: "1" },
-          { label: "库存总量", value: "100" },
-          { label: "待处理订单", value: "0" },
+          { label: "客户数", value: customerCount },
+          { label: "商品数", value: productCount },
+          { label: "销售订单", value: orderCount },
+          { label: "库存总量", value: totalStock },
         ].map((card) => (
           <div key={card.label} className="rounded-2xl border bg-white p-4">
             <div className="text-sm text-slate-500">{card.label}</div>
@@ -16,6 +29,12 @@ export default function DashboardPage() {
           </div>
         ))}
       </div>
+
+      {lowStock > 0 && (
+        <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+          有 {lowStock} 个商品低于安全库存，请及时补货
+        </div>
+      )}
     </div>
   );
 }
