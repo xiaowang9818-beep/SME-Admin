@@ -11,15 +11,18 @@ const demoAccounts = [
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100">
+      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
         <div className="text-center">
-          <h1 className="text-2xl font-semibold">通用企业管理系统</h1>
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-900 text-lg font-semibold text-white">
+            企
+          </div>
+          <h1 className="text-2xl font-semibold text-slate-900">通用企业管理系统</h1>
           <p className="mt-1 text-sm text-slate-500">中小企业进销存管理平台</p>
         </div>
 
         <form
-          className="mt-6 space-y-4"
+          className="mt-8 space-y-4"
           action={async (formData) => {
             "use server";
             await signIn("credentials", {
@@ -30,31 +33,31 @@ export default function LoginPage() {
           }}
         >
           <div>
-            <label className="text-sm text-slate-600">邮箱</label>
+            <label className="text-sm font-medium text-slate-700">邮箱</label>
             <input
               name="email"
               type="email"
               required
-              className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:border-black"
+              className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
               defaultValue="boss@example.com"
             />
           </div>
           <div>
-            <label className="text-sm text-slate-600">密码</label>
+            <label className="text-sm font-medium text-slate-700">密码</label>
             <input
               name="password"
               type="password"
               required
-              className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:border-black"
+              className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
               defaultValue="Boss123456!"
             />
           </div>
-          <button className="mt-2 w-full rounded-lg bg-black py-3 text-sm font-medium text-white hover:bg-slate-800">
+          <button className="mt-2 w-full rounded-lg bg-slate-900 py-3 text-sm font-medium text-white hover:bg-slate-800">
             登录
           </button>
         </form>
 
-        <div className="mt-6">
+        <div className="mt-8">
           <div className="text-center text-xs text-slate-400">演示账号（点击快速登录）</div>
           <div className="mt-3 flex flex-wrap justify-center gap-2">
             {demoAccounts.map((acc) => (
@@ -69,7 +72,7 @@ export default function LoginPage() {
                   });
                 }}
               >
-                <button className="rounded-full border px-3 py-1 text-xs hover:bg-slate-50">
+                <button className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600 hover:bg-slate-50">
                   {acc.label}
                 </button>
               </form>

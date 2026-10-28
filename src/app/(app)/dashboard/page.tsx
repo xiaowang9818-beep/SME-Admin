@@ -16,24 +16,22 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <div className="flex items-end justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">工作台</h1>
-          <p className="mt-1 text-sm text-slate-500">通用企业管理系统</p>
-        </div>
+      <div>
+        <h1 className="text-2xl font-semibold text-slate-900">工作台</h1>
+        <p className="mt-1 text-sm text-slate-500">通用企业管理系统</p>
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-5">
         {[
-          { label: "客户数", value: customerCount, color: "text-blue-600" },
-          { label: "商品数", value: productCount, color: "text-slate-900" },
-          { label: "销售订单", value: orderCount, color: "text-emerald-600" },
-          { label: "库存总量", value: totalStock, color: "text-slate-900" },
-          { label: "员工数", value: employeeCount, color: "text-slate-900" },
+          { label: "客户数", value: customerCount, accent: "text-blue-600" },
+          { label: "商品数", value: productCount, accent: "text-slate-900" },
+          { label: "销售订单", value: orderCount, accent: "text-emerald-600" },
+          { label: "库存总量", value: totalStock, accent: "text-slate-900" },
+          { label: "员工数", value: employeeCount, accent: "text-slate-900" },
         ].map((card) => (
-          <div key={card.label} className="rounded-2xl border bg-white p-4">
-            <div className="text-xs text-slate-500">{card.label}</div>
-            <div className={`mt-2 text-2xl font-semibold ${card.color}`}>{card.value}</div>
+          <div key={card.label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="text-xs font-medium text-slate-500">{card.label}</div>
+            <div className={`mt-2 text-2xl font-semibold ${card.accent}`}>{card.value}</div>
           </div>
         ))}
       </div>
@@ -46,11 +44,11 @@ export default async function DashboardPage() {
 
       {announcements.length > 0 && (
         <div className="mt-6">
-          <h2 className="text-base font-medium">最新公告</h2>
-          <div className="mt-2 space-y-2">
+          <h2 className="text-base font-medium text-slate-900">最新公告</h2>
+          <div className="mt-3 space-y-2">
             {announcements.map((a) => (
-              <div key={a.id} className="rounded-xl border bg-white px-4 py-3">
-                <div className="text-sm font-medium">{a.title}</div>
+              <div key={a.id} className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+                <div className="text-sm font-medium text-slate-900">{a.title}</div>
                 <div className="mt-1 text-xs text-slate-500 line-clamp-2">{a.content}</div>
               </div>
             ))}

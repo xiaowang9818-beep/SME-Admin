@@ -13,7 +13,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const userName = session?.user?.name || "用户";
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-slate-50">
       {open && (
         <div
           className="fixed inset-0 z-20 bg-black/40 md:hidden"
@@ -22,31 +22,31 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-30 w-56 transform border-r bg-white p-4 transition-transform md:static md:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed inset-y-0 left-0 z-30 w-60 transform border-r border-slate-200 bg-white p-5 transition-transform md:static md:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}
       >
-        <div className="mb-6 flex items-center justify-between">
-          <div className="text-lg font-semibold">通用企业管理系统</div>
-          <button className="md:hidden text-sm" onClick={() => setOpen(false)}>
+        <div className="mb-8 flex items-center justify-between">
+          <div className="text-base font-semibold text-slate-900">通用企业管理系统</div>
+          <button className="md:hidden text-slate-400" onClick={() => setOpen(false)}>
             ×
           </button>
         </div>
-        <nav className="space-y-1">
+        <nav className="space-y-0.5">
           {menus.map((m) => (
             <Link
               key={m.href}
               href={m.href}
               onClick={() => setOpen(false)}
-              className="block rounded-lg px-3 py-2 text-sm hover:bg-slate-100"
+              className="block rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
             >
               {m.label}
             </Link>
           ))}
         </nav>
-        <div className="mt-6 border-t pt-4 text-sm">
+        <div className="mt-8 border-t border-slate-100 pt-4 text-sm">
           <div className="text-slate-500">{userName}</div>
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
-            className="mt-2 text-xs text-rose-600"
+            className="mt-2 text-xs text-rose-600 hover:text-rose-700"
           >
             退出登录
           </button>
@@ -54,11 +54,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="flex-1">
-        <header className="flex items-center border-b bg-white px-4 py-3 md:hidden">
-          <button onClick={() => setOpen(true)} className="text-sm">
+        <header className="flex items-center border-b border-slate-200 bg-white px-4 py-3 md:hidden">
+          <button onClick={() => setOpen(true)} className="text-sm text-slate-700">
             菜单
           </button>
-          <span className="ml-3 text-sm font-medium">通用企业管理系统</span>
+          <span className="ml-3 text-sm font-medium text-slate-900">通用企业管理系统</span>
         </header>
         <main className="p-4 md:p-6">{children}</main>
       </div>
