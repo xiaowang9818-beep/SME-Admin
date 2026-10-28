@@ -49,7 +49,7 @@ async function main() {
     create: { productId: product.id, warehouseId: warehouse.id, quantity: 100 },
   });
 
-  const customer = await prisma.customer.upsert({
+  await prisma.customer.upsert({
     where: { id: "cust-1" },
     update: {},
     create: {
@@ -58,6 +58,17 @@ async function main() {
       contact: "张三",
       phone: "13800000000",
       level: "A",
+    },
+  });
+
+  await prisma.supplier.upsert({
+    where: { id: "sup-1" },
+    update: {},
+    create: {
+      id: "sup-1",
+      name: "示例供应商",
+      contact: "李四",
+      phone: "13900000000",
     },
   });
 
