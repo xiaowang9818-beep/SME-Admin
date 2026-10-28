@@ -153,6 +153,7 @@ model Product {
   updatedAt   DateTime @updatedAt
 
   stockItems    StockItem[]
+  stockMoves    StockMove[]
   salesLines    SalesOrderLine[]
   purchaseLines PurchaseOrderLine[]
 }
