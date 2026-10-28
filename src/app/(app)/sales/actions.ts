@@ -11,7 +11,7 @@ export async function shipOrder(formData: FormData) {
     where: { id: orderId },
     include: { lines: true },
   });
-  if (!order || order.status === "SHIPPED" || order.status === "COMPLETED") return;
+  if (!order || order.status === "SHIPPED" || order.status === "COMPLETED" || order.status === "CANCELLED") return;
 
   const warehouse = await prisma.warehouse.findFirst();
   if (!warehouse) return;
@@ -70,4 +70,16 @@ export async function markSalesPaid(formData: FormData) {
 
   revalidatePath("/sales");
   revalidatePath("/finance");
+}
+
+export async function cancelSalesOrder(formData: FormData) {
+  const orderId = String(formData.get("orderId") || "");
+  if (!orderId) return;
+
+  await prisma.salesOrder.update({
+    where: { id: orderId },
+    data: { status: "CANCELLED" },
+  });
+
+  revalidatePath("/sales");
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { deleteProduct } from "./actions";
 
 export default async function ProductsPage() {
   const products = await prisma.product.findMany({
@@ -38,10 +39,14 @@ export default async function ProductsPage() {
                   <td className="px-4 py-3">{p.category || "-"}</td>
                   <td className="px-4 py-3">¥{p.salePrice.toFixed(2)}</td>
                   <td className="px-4 py-3">{stock}</td>
-                  <td className="px-4 py-3">
-                    <Link href={`/products/${p.id}`} className="text-blue-600">
+                  <td className="px-4 py-3 space-x-2">
+                    <Link href={`/products/${p.id}`} className="text-blue-600 text-xs">
                       编辑
                     </Link>
+                    <form action={deleteProduct} className="inline">
+                      <input type="hidden" name="id" value={p.id} />
+                      <button className="text-rose-600 text-xs">删除</button>
+                    </form>
                   </td>
                 </tr>
               );

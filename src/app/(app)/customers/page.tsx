@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { deleteCustomer } from "./actions";
 
 export default async function CustomersPage() {
   const customers = await prisma.customer.findMany({
@@ -33,17 +34,21 @@ export default async function CustomersPage() {
                 <td className="px-4 py-3">{c.contact || "-"}</td>
                 <td className="px-4 py-3">{c.phone || "-"}</td>
                 <td className="px-4 py-3">{c.level}</td>
-                <td className="px-4 py-3">
-                  <Link href={`/customers/${c.id}`} className="text-blue-600">
+                <td className="px-4 py-3 space-x-2">
+                  <Link href={`/customers/${c.id}`} className="text-blue-600 text-xs">
                     编辑
                   </Link>
+                  <form action={deleteCustomer} className="inline">
+                    <input type="hidden" name="id" value={c.id} />
+                    <button className="text-rose-600 text-xs">删除</button>
+                  </form>
                 </td>
               </tr>
             ))}
             {customers.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-4 py-8 text-center text-slate-400">
-                  暂无客户，点击右上角新建
+                  暂无客户
                 </td>
               </tr>
             )}

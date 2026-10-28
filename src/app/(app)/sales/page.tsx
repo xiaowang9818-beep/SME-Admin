@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { shipOrder, markSalesPaid } from "./actions";
+import { shipOrder, markSalesPaid, cancelSalesOrder } from "./actions";
 
 export default async function SalesPage() {
   const orders = await prisma.salesOrder.findMany({
@@ -39,12 +39,18 @@ export default async function SalesPage() {
                 <td className="px-4 py-3">{o.paymentStatus}</td>
                 <td className="px-4 py-3 space-x-2">
                   {(o.status === "DRAFT" || o.status === "CONFIRMED") && (
-                    <form action={shipOrder} className="inline">
-                      <input type="hidden" name="orderId" value={o.id} />
-                      <button className="text-blue-600 text-xs">发货</button>
-                    </form>
+                    <>
+                      <form action={shipOrder} className="inline">
+                        <input type="hidden" name="orderId" value={o.id} />
+                        <button className="text-blue-600 text-xs">发货</button>
+                      </form>
+                      <form action={cancelSalesOrder} className="inline">
+                        <input type="hidden" name="orderId" value={o.id} />
+                        <button className="text-rose-600 text-xs">作废</button>
+                      </form>
+                    </>
                   )}
-                  {o.paymentStatus !== "PAID" && (
+                  {o.paymentStatus !== "PAID" && o.status !== "CANCELLED" && (
                     <form action={markSalesPaid} className="inline">
                       <input type="hidden" name="orderId" value={o.id} />
                       <button className="text-emerald-600 text-xs">标记已收款</button>
