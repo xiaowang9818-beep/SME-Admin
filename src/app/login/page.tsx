@@ -11,10 +11,12 @@ const demoAccounts = [
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow">
-        <h1 className="text-2xl font-semibold">通用企业管理系统</h1>
-        <p className="mt-1 text-sm text-slate-500">中小企业进销存管理平台</p>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
+      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
+        <div className="text-center">
+          <h1 className="text-2xl font-semibold">通用企业管理系统</h1>
+          <p className="mt-1 text-sm text-slate-500">中小企业进销存管理平台</p>
+        </div>
 
         <form
           className="mt-6 space-y-4"
@@ -28,31 +30,33 @@ export default function LoginPage() {
           }}
         >
           <div>
-            <label className="text-sm">邮箱</label>
+            <label className="text-sm text-slate-600">邮箱</label>
             <input
               name="email"
               type="email"
               required
-              className="mt-1 w-full border-b py-2 outline-none"
+              className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:border-black"
               defaultValue="boss@example.com"
             />
           </div>
           <div>
-            <label className="text-sm">密码</label>
+            <label className="text-sm text-slate-600">密码</label>
             <input
               name="password"
               type="password"
               required
-              className="mt-1 w-full border-b py-2 outline-none"
+              className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:border-black"
               defaultValue="Boss123456!"
             />
           </div>
-          <button className="mt-4 w-full rounded-full bg-black py-3 text-white">登录</button>
+          <button className="mt-2 w-full rounded-lg bg-black py-3 text-sm font-medium text-white hover:bg-slate-800">
+            登录
+          </button>
         </form>
 
         <div className="mt-6">
-          <div className="text-xs text-slate-400">演示账号（点击填充）</div>
-          <div className="mt-2 flex flex-wrap gap-2">
+          <div className="text-center text-xs text-slate-400">演示账号（点击快速登录）</div>
+          <div className="mt-3 flex flex-wrap justify-center gap-2">
             {demoAccounts.map((acc) => (
               <form
                 key={acc.email}
