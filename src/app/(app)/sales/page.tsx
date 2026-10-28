@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { shipOrder } from "./actions";
 
 export default async function SalesPage() {
   const orders = await prisma.salesOrder.findMany({
     orderBy: { createdAt: "desc" },
-    include: { customer: true },
+    include: { customer: true, lines: true },
   });
 
   return (
@@ -25,6 +26,7 @@ export default async function SalesPage() {
               <th className="px-4 py-3">金额</th>
               <th className="px-4 py-3">状态</th>
               <th className="px-4 py-3">收款</th>
+              <th className="px-4 py-3">操作</th>
             </tr>
           </thead>
           <tbody>
@@ -35,11 +37,21 @@ export default async function SalesPage() {
                 <td className="px-4 py-3">¥{o.totalAmount.toFixed(2)}</td>
                 <td className="px-4 py-3">{o.status}</td>
                 <td className="px-4 py-3">{o.paymentStatus}</td>
+                <td className="px-4 py-3">
+                  {o.status === "DRAFT" || o.status === "CONFIRMED" ? (
+                    <form action={shipOrder}>
+                      <input type="hidden" name="orderId" value={o.id} />
+                      <button className="text-blue-600 text-xs">发货</button>
+                    </form>
+                  ) : (
+                    <span className="text-slate-400 text-xs">-</span>
+                  )}
+                </td>
               </tr>
             ))}
             {orders.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-slate-400">
+                <td colSpan={6} className="px-4 py-8 text-center text-slate-400">
                   暂无销售订单
                 </td>
               </tr>
