@@ -23,15 +23,17 @@ export default async function DashboardPage() {
 
       <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-5">
         {[
-          { label: "客户数", value: customerCount, accent: "text-blue-600" },
-          { label: "商品数", value: productCount, accent: "text-slate-900" },
-          { label: "销售订单", value: orderCount, accent: "text-emerald-600" },
-          { label: "库存总量", value: totalStock, accent: "text-slate-900" },
-          { label: "员工数", value: employeeCount, accent: "text-slate-900" },
+          { label: "客户数", value: customerCount, color: "bg-blue-50 text-blue-700" },
+          { label: "商品数", value: productCount, color: "bg-slate-100 text-slate-800" },
+          { label: "销售订单", value: orderCount, color: "bg-emerald-50 text-emerald-700" },
+          { label: "库存总量", value: totalStock, color: "bg-indigo-50 text-indigo-700" },
+          { label: "员工数", value: employeeCount, color: "bg-amber-50 text-amber-700" },
         ].map((card) => (
           <div key={card.label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="text-xs font-medium text-slate-500">{card.label}</div>
-            <div className={`mt-2 text-2xl font-semibold ${card.accent}`}>{card.value}</div>
+            <div className={`mt-2 inline-block rounded-lg px-2 py-0.5 text-2xl font-semibold ${card.color}`}>
+              {card.value}
+            </div>
           </div>
         ))}
       </div>
@@ -47,7 +49,7 @@ export default async function DashboardPage() {
           <h2 className="text-base font-medium text-slate-900">最新公告</h2>
           <div className="mt-3 space-y-2">
             {announcements.map((a) => (
-              <div key={a.id} className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+              <div key={a.id} className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
                 <div className="text-sm font-medium text-slate-900">{a.title}</div>
                 <div className="mt-1 text-xs text-slate-500 line-clamp-2">{a.content}</div>
               </div>

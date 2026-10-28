@@ -11,10 +11,10 @@ const demoAccounts = [
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-slate-100">
       <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
         <div className="text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-900 text-lg font-semibold text-white">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 text-xl font-bold text-white">
             企
           </div>
           <h1 className="text-2xl font-semibold text-slate-900">通用企业管理系统</h1>
@@ -38,7 +38,7 @@ export default function LoginPage() {
               name="email"
               type="email"
               required
-              className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+              className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
               defaultValue="boss@example.com"
             />
           </div>
@@ -48,11 +48,11 @@ export default function LoginPage() {
               name="password"
               type="password"
               required
-              className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+              className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
               defaultValue="Boss123456!"
             />
           </div>
-          <button className="mt-2 w-full rounded-lg bg-slate-900 py-3 text-sm font-medium text-white hover:bg-slate-800">
+          <button className="mt-2 w-full rounded-lg bg-indigo-600 py-3 text-sm font-medium text-white hover:bg-indigo-700">
             登录
           </button>
         </form>
@@ -72,7 +72,7 @@ export default function LoginPage() {
                   });
                 }}
               >
-                <button className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600 hover:bg-slate-50">
+                <button className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">
                   {acc.label}
                 </button>
               </form>
