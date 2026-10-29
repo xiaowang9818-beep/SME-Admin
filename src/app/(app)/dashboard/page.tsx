@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { getStockLevel } from "@/lib/stock";
 
 export default async function DashboardPage() {
   const [
@@ -25,7 +26,8 @@ export default async function DashboardPage() {
   ]);
 
   const totalStock = stockItems.reduce((s, i) => s + i.quantity, 0);
-  const lowStockItems = stockItems.filter((i) => i.quantity < i.product.safetyStock);
+  const criticalItems = stockItems.filter((i) => getStockLevel(i.quantity, i.product.safetyStock) === "CRITICAL");
+  const warningItems = stockItems.filter((i) => getStockLevel(i.quantity, i.product.safetyStock) === "WARNING");
 
   const unpaidOrders = await prisma.salesOrder.count({
     where: { paymentStatus: { not: "PAID" }, status: { not: "CANCELLED" } },
@@ -57,19 +59,39 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      {lowStockItems.length > 0 && (
-        <div className="mt-5 rounded-2xl border border-amber-300 bg-amber-50 p-4">
-          <div className="text-sm font-medium text-amber-800">低库存提醒 ({lowStockItems.length})</div>
-          <div className="mt-2 space-y-1">
-            {lowStockItems.slice(0, 3).map((item) => (
-              <div key={item.id} className="text-xs text-amber-700">
-                {item.product.name} — 当前 {item.quantity} / 安全 {item.product.safetyStock}
+      {/* 库存预警 */}
+      {(criticalItems.length > 0 || warningItems.length > 0) && (
+        <div className="mt-5 grid gap-3 md:grid-cols-2">
+          {criticalItems.length > 0 && (
+            <div className="rounded-2xl border border-rose-300 bg-rose-50 p-4">
+              <div className="text-sm font-medium text-rose-800">严重不足 ({criticalItems.length})</div>
+              <div className="mt-2 space-y-1">
+                {criticalItems.slice(0, 3).map((item) => (
+                  <div key={item.id} className="text-xs text-rose-700">
+                    {item.product.name} — 当前 {item.quantity} / 安全 {item.product.safetyStock}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <Link href="/inventory" className="mt-2 inline-block text-xs text-amber-700 underline">
-            查看库存
-          </Link>
+              <Link href="/inventory" className="mt-2 inline-block text-xs text-rose-700 underline">
+                查看库存
+              </Link>
+            </div>
+          )}
+          {warningItems.length > 0 && (
+            <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4">
+              <div className="text-sm font-medium text-amber-800">低库存警告 ({warningItems.length})</div>
+              <div className="mt-2 space-y-1">
+                {warningItems.slice(0, 3).map((item) => (
+                  <div key={item.id} className="text-xs text-amber-700">
+                    {item.product.name} — 当前 {item.quantity} / 安全 {item.product.safetyStock}
+                  </div>
+                ))}
+              </div>
+              <Link href="/inventory" className="mt-2 inline-block text-xs text-amber-700 underline">
+                查看库存
+              </Link>
+            </div>
+          )}
         </div>
       )}
 

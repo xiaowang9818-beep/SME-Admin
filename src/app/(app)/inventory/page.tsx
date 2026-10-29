@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { stockIn, stockOut } from "./actions";
+import { getStockLevel, getStockLevelLabel, getStockLevelColor } from "@/lib/stock";
 
 export default async function InventoryPage() {
   const items = await prisma.stockItem.findMany({
@@ -8,7 +9,6 @@ export default async function InventoryPage() {
   });
 
   const products = await prisma.product.findMany({ orderBy: { name: "asc" } });
-  const warehouse = await prisma.warehouse.findFirst();
 
   const moves = await prisma.stockMove.findMany({
     orderBy: { createdAt: "desc" },
@@ -16,9 +16,42 @@ export default async function InventoryPage() {
     include: { product: true },
   });
 
+  const critical = items.filter((i) => getStockLevel(i.quantity, i.product.safetyStock) === "CRITICAL");
+  const warning = items.filter((i) => getStockLevel(i.quantity, i.product.safetyStock) === "WARNING");
+
   return (
     <div className="mx-auto max-w-6xl">
       <h1 className="text-2xl font-semibold text-slate-900">库存管理</h1>
+
+      {/* 预警汇总 */}
+      {(critical.length > 0 || warning.length > 0) && (
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          {critical.length > 0 && (
+            <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
+              <div className="text-sm font-medium text-rose-800">严重不足 ({critical.length})</div>
+              <div className="mt-2 space-y-1">
+                {critical.slice(0, 3).map((i) => (
+                  <div key={i.id} className="text-xs text-rose-700">
+                    {i.product.name} — 当前 {i.quantity} / 安全 {i.product.safetyStock}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {warning.length > 0 && (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+              <div className="text-sm font-medium text-amber-800">低库存警告 ({warning.length})</div>
+              <div className="mt-2 space-y-1">
+                {warning.slice(0, 3).map((i) => (
+                  <div key={i.id} className="text-xs text-amber-700">
+                    {i.product.name} — 当前 {i.quantity} / 安全 {i.product.safetyStock}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 入库 / 出库表单 */}
       <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -75,21 +108,19 @@ export default async function InventoryPage() {
             </thead>
             <tbody>
               {items.map((item) => {
-                const isLow = item.quantity < item.product.safetyStock;
+                const level = getStockLevel(item.quantity, item.product.safetyStock);
                 return (
                   <tr key={item.id} className="border-b border-slate-100 last:border-0">
                     <td className="px-4 py-3 font-medium text-slate-900">{item.product.name}</td>
                     <td className="px-4 py-3 text-slate-600">{item.warehouse.name}</td>
-                    <td className={`px-4 py-3 font-semibold ${isLow ? "text-rose-600" : "text-slate-900"}`}>
+                    <td className={`px-4 py-3 font-semibold ${level === "CRITICAL" ? "text-rose-600" : level === "WARNING" ? "text-amber-600" : ""}`}>
                       {item.quantity}
                     </td>
                     <td className="px-4 py-3 text-slate-500">{item.product.safetyStock}</td>
                     <td className="px-4 py-3">
-                      {isLow ? (
-                        <span className="rounded-full bg-rose-50 px-2 py-0.5 text-xs text-rose-700">低库存</span>
-                      ) : (
-                        <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700">正常</span>
-                      )}
+                      <span className={`rounded-full px-2 py-0.5 text-xs ${getStockLevelColor(level)}`}>
+                        {getStockLevelLabel(level)}
+                      </span>
                     </td>
                   </tr>
                 );
