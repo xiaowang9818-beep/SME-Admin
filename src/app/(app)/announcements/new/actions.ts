@@ -1,9 +1,14 @@
 "use server";
 
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 
 export async function createAnnouncement(formData: FormData) {
+  const session = await auth();
+  const role = (session?.user as { role?: string } | undefined)?.role;
+  if (role !== "BOSS" && role !== "HR") redirect("/announcements");
+
   const title = String(formData.get("title") || "").trim();
   const content = String(formData.get("content") || "").trim();
   if (!title || !content) return;

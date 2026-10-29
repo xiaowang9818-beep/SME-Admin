@@ -1,10 +1,16 @@
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 import { createAnnouncement } from "./actions";
 
-export default function NewAnnouncementPage() {
+export default async function NewAnnouncementPage() {
+  const session = await auth();
+  const role = (session?.user as { role?: string } | undefined)?.role;
+  if (role !== "BOSS" && role !== "HR") redirect("/announcements");
+
   return (
     <div className="mx-auto max-w-2xl">
       <h1 className="text-2xl font-semibold text-slate-900">发布公告</h1>
-      <p className="mt-1 text-sm text-slate-500">填写公告内容</p>
+      <p className="mt-1 text-sm text-slate-500">发出后所有账号都能在公告里看到</p>
 
       <form action={createAnnouncement} className="mt-6 space-y-5 rounded-2xl border border-indigo-200 bg-indigo-50 p-6">
         <div>

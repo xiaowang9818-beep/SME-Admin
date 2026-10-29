@@ -4,8 +4,10 @@ export type MenuItem = {
   roles: string[];
 };
 
+const ALL = ["BOSS", "SALES", "PURCHASE", "WAREHOUSE", "FINANCE", "HR"];
+
 export const MENUS: MenuItem[] = [
-  { href: "/dashboard", label: "工作台", roles: ["BOSS", "SALES", "PURCHASE", "WAREHOUSE", "FINANCE", "HR"] },
+  { href: "/dashboard", label: "工作台", roles: ALL },
   { href: "/customers", label: "客户", roles: ["BOSS", "SALES"] },
   { href: "/suppliers", label: "供应商", roles: ["BOSS", "PURCHASE"] },
   { href: "/products", label: "商品", roles: ["BOSS", "SALES", "PURCHASE", "WAREHOUSE"] },
@@ -14,7 +16,7 @@ export const MENUS: MenuItem[] = [
   { href: "/inventory", label: "库存", roles: ["BOSS", "WAREHOUSE", "PURCHASE"] },
   { href: "/finance", label: "财务", roles: ["BOSS", "FINANCE"] },
   { href: "/employees", label: "员工", roles: ["BOSS", "HR"] },
-  { href: "/announcements", label: "公告", roles: ["BOSS", "HR"] },
+  { href: "/announcements", label: "公告", roles: ALL },
   { href: "/reports", label: "报表", roles: ["BOSS", "FINANCE"] },
   { href: "/logs", label: "操作日志", roles: ["BOSS"] },
 ];
