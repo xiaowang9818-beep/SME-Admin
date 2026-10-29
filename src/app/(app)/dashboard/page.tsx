@@ -25,7 +25,7 @@ function money(n: number) {
 }
 
 export default async function DashboardPage() {
-  const [openSales, openPurchases, stockItems, unpaidSales] = await Promise.all([
+  const [openSales, openPurchases, stockItems, unpaidSales, latestAnnouncement] = await Promise.all([
     prisma.salesOrder.findMany({
       where: { status: { in: ["DRAFT", "CONFIRMED", "PARTIAL_SHIPPED"] } },
       include: { customer: true },
@@ -44,6 +44,7 @@ export default async function DashboardPage() {
       include: { customer: true },
       orderBy: { orderDate: "asc" },
     }),
+    prisma.announcement.findFirst({ orderBy: { createdAt: "desc" } }),
   ]);
 
   const alerts = stockItems
@@ -82,6 +83,17 @@ export default async function DashboardPage() {
         <div className="text-sm text-slate-400">{today}</div>
       </div>
 
+      {latestAnnouncement && (
+        <Link href="/announcements" className="mt-5 block rounded-2xl border border-indigo-200 bg-indigo-50 px-5 py-4 hover:bg-indigo-100/70">
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-xs font-medium text-indigo-700">最新公告</div>
+            <div className="text-xs text-indigo-400">{latestAnnouncement.createdAt.toLocaleString("zh-CN")}</div>
+          </div>
+          <div className="mt-1 text-sm font-medium text-slate-900">{latestAnnouncement.title}</div>
+          <div className="mt-1 line-clamp-2 text-sm text-slate-600">{latestAnnouncement.content}</div>
+        </Link>
+      )}
+
       <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Link href="/sales" className="rounded-2xl border border-slate-200 bg-white p-4 hover:border-indigo-200">
           <div className="text-xs text-slate-500">待发货</div>
@@ -110,8 +122,7 @@ export default async function DashboardPage() {
       </div>
 
       <section className="mt-5 rounded-2xl border border-slate-200 bg-white">
-        <div className="border-b border-slate-100 px-5 py-3 text-sm font-medium text-slate-900">先看这些
-        </div>
+        <div className="border-b border-slate-100 px-5 py-3 text-sm font-medium text-slate-900">先看这些</div>
         <div className="divide-y divide-slate-100">
           {alerts.slice(0, 3).map((item) => (
             <Link key={item.id} href="/inventory" className="flex items-center gap-3 px-5 py-3 hover:bg-slate-50">
