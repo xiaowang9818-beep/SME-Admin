@@ -15,22 +15,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen bg-slate-100">
       {open && (
-        <div
-          className="fixed inset-0 z-20 bg-black/40 md:hidden"
-          onClick={() => setOpen(false)}
-        />
+        <div className="fixed inset-0 z-20 bg-black/40 md:hidden" onClick={() => setOpen(false)} />
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-30 w-60 transform border-r border-slate-200 bg-white p-5 transition-transform md:static md:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed inset-y-0 left-0 z-30 flex w-60 flex-col border-r border-slate-200 bg-white p-5 transition-transform md:static md:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div className="mb-8 flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-sm font-bold text-white">
             企
           </div>
           <div className="text-sm font-semibold text-slate-900">通用企业管理系统</div>
         </div>
-        <nav className="space-y-0.5">
+
+        <nav className="flex-1 space-y-0.5">
           {menus.map((m) => (
             <Link
               key={m.href}
@@ -42,7 +40,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </Link>
           ))}
         </nav>
-        <div className="mt-8 border-t border-slate-100 pt-4 text-sm">
+
+        <div className="mt-6 border-t border-slate-100 pt-4 text-sm">
           <div className="text-slate-500">{userName}</div>
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
@@ -55,12 +54,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       <div className="flex-1">
         <header className="flex items-center border-b border-slate-200 bg-white px-4 py-3 md:hidden">
-          <button onClick={() => setOpen(true)} className="text-sm text-slate-700">
-            菜单
-          </button>
+          <button onClick={() => setOpen(true)} className="text-sm text-slate-700">菜单</button>
           <span className="ml-3 text-sm font-medium text-slate-900">通用企业管理系统</span>
         </header>
-        <main className="p-4 md:p-6">{children}</main>
+        <main className="p-6">{children}</main>
       </div>
     </div>
   );
