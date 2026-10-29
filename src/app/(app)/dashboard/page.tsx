@@ -31,6 +31,14 @@ export default async function DashboardPage() {
     where: { paymentStatus: { not: "PAID" }, status: { not: "CANCELLED" } },
   });
 
+  const cards = [
+    { label: "客户数", value: customerCount, bg: "bg-blue-500", light: "bg-blue-50" },
+    { label: "商品数", value: productCount, bg: "bg-slate-500", light: "bg-slate-100" },
+    { label: "销售订单", value: orderCount, bg: "bg-emerald-500", light: "bg-emerald-50" },
+    { label: "库存总量", value: totalStock, bg: "bg-indigo-500", light: "bg-indigo-50" },
+    { label: "未收款", value: unpaidOrders, bg: "bg-amber-500", light: "bg-amber-50" },
+  ];
+
   return (
     <div className="mx-auto max-w-6xl">
       <div className="mb-6">
@@ -38,25 +46,19 @@ export default async function DashboardPage() {
         <p className="mt-1 text-sm text-slate-500">通用企业管理系统</p>
       </div>
 
-      {/* 核心指标 */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
-        {[
-          { label: "客户数", value: customerCount, color: "text-blue-600" },
-          { label: "商品数", value: productCount, color: "text-slate-900" },
-          { label: "销售订单", value: orderCount, color: "text-emerald-600" },
-          { label: "库存总量", value: totalStock, color: "text-indigo-600" },
-          { label: "未收款订单", value: unpaidOrders, color: "text-amber-600" },
-        ].map((card) => (
-          <div key={card.label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="text-xs font-medium text-slate-500">{card.label}</div>
-            <div className={`mt-2 text-3xl font-bold ${card.color}`}>{card.value}</div>
+        {cards.map((card) => (
+          <div key={card.label} className={`rounded-2xl border border-slate-200 ${card.light} p-5 shadow-sm`}>
+            <div className="text-xs font-medium text-slate-600">{card.label}</div>
+            <div className={`mt-2 text-3xl font-bold text-white ${card.bg} inline-block rounded-lg px-3 py-1`}>
+              {card.value}
+            </div>
           </div>
         ))}
       </div>
 
-      {/* 低库存提醒 */}
       {lowStockItems.length > 0 && (
-        <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+        <div className="mt-5 rounded-2xl border border-amber-300 bg-amber-50 p-4">
           <div className="text-sm font-medium text-amber-800">低库存提醒 ({lowStockItems.length})</div>
           <div className="mt-2 space-y-1">
             {lowStockItems.slice(0, 3).map((item) => (
@@ -72,13 +74,10 @@ export default async function DashboardPage() {
       )}
 
       <div className="mt-6 grid gap-6 md:grid-cols-2">
-        {/* 最近订单 */}
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-medium text-slate-900">最近销售订单</h2>
-            <Link href="/sales" className="text-xs text-indigo-600 hover:text-indigo-700">
-              查看全部
-            </Link>
+            <Link href="/sales" className="text-xs text-indigo-600 hover:text-indigo-700">查看全部</Link>
           </div>
           <div className="mt-4 space-y-3">
             {recentOrders.map((o) => (
@@ -88,7 +87,7 @@ export default async function DashboardPage() {
                   <div className="text-xs text-slate-500">{o.customer.name}</div>
                 </div>
                 <div className="text-right">
-                  <div className="font-medium">¥{o.totalAmount.toFixed(2)}</div>
+                  <div className="font-medium text-emerald-600">¥{o.totalAmount.toFixed(2)}</div>
                   <div className="text-xs text-slate-400">{o.status}</div>
                 </div>
               </div>
@@ -99,13 +98,10 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* 公告 */}
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-medium text-slate-900">最新公告</h2>
-            <Link href="/announcements" className="text-xs text-indigo-600 hover:text-indigo-700">
-              查看全部
-            </Link>
+            <Link href="/announcements" className="text-xs text-indigo-600 hover:text-indigo-700">查看全部</Link>
           </div>
           <div className="mt-4 space-y-3">
             {announcements.map((a) => (
@@ -121,21 +117,20 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* 快捷操作 */}
       <div className="mt-6">
         <h2 className="text-base font-medium text-slate-900">快捷操作</h2>
         <div className="mt-3 flex flex-wrap gap-3">
           <Link href="/sales/new" className="rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700">
             新建销售订单
           </Link>
-          <Link href="/purchases/new" className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+          <Link href="/purchases/new" className="rounded-lg bg-emerald-600 px-4 py-2 text-sm text-white hover:bg-emerald-700">
             新建采购订单
+          </Link>
+          <Link href="/inventory" className="rounded-lg bg-amber-500 px-4 py-2 text-sm text-white hover:bg-amber-600">
+            库存入出库
           </Link>
           <Link href="/customers/new" className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
             新建客户
-          </Link>
-          <Link href="/products/new" className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
-            新建商品
           </Link>
         </div>
       </div>
