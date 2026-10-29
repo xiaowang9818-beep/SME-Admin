@@ -4,8 +4,16 @@ import { prisma } from "@/lib/prisma";
 
 export default async function AnnouncementsPage() {
   const session = await auth();
-  const role = (session?.user as { role?: string } | undefined)?.role;
-  const canPublish = role === "BOSS" || role === "HR";
+  const user = session?.user as { role?: string; id?: string } | undefined;
+  const canPublish = user?.role === "BOSS" || user?.role === "HR";
+
+  if (user?.id) {
+    await prisma.announcementSeen.upsert({
+      where: { userId: user.id },
+      create: { userId: user.id, seenAt: new Date() },
+      update: { seenAt: new Date() },
+    });
+  }
 
   const items = await prisma.announcement.findMany({
     orderBy: { createdAt: "desc" },
@@ -16,7 +24,7 @@ export default async function AnnouncementsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900">公告</h1>
-          <p className="mt-1 text-sm text-slate-500">老板或人事发出后，所有账号都能看到</p>
+          <p className="mt-1 text-sm text-slate-500">老板或人事发出后，所有账号左侧会出现红点</p>
         </div>
         {canPublish && (
           <Link href="/announcements/new" className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">

@@ -74,7 +74,8 @@ model User {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  role Role @relation(fields: [roleId], references: [id])
+  role             Role              @relation(fields: [roleId], references: [id])
+  announcementSeen AnnouncementSeen?
 }
 
 model Role {
@@ -275,6 +276,13 @@ model Announcement {
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model AnnouncementSeen {
+  userId String   @id
+  seenAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model AuditLog {

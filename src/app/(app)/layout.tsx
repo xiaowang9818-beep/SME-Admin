@@ -2,17 +2,41 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { getMenusForRole } from "@/lib/menus";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [unread, setUnread] = useState(0);
   const pathname = usePathname();
   const { data: session } = useSession();
   const role = (session?.user as { role?: string } | undefined)?.role;
   const menus = getMenusForRole(role);
   const userName = session?.user?.name || "用户";
+
+  useEffect(() => {
+    let stop = false;
+
+    async function load() {
+      try {
+        const res = await fetch("/api/announcements/unread", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!stop) setUnread(Number(data.count) || 0);
+      } catch {
+        // ignore while the page is refreshing
+      }
+    }
+
+    const first = window.setTimeout(load, pathname.startsWith("/announcements") ? 400 : 0);
+    const timer = window.setInterval(load, 15000);
+    return () => {
+      stop = true;
+      window.clearTimeout(first);
+      window.clearInterval(timer);
+    };
+  }, [pathname]);
 
   return (
     <div className="flex min-h-screen bg-slate-100">
@@ -33,18 +57,24 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <nav className="flex-1 space-y-0.5 overflow-y-auto">
           {menus.map((m) => {
             const active = pathname === m.href || pathname.startsWith(m.href + "/");
+            const showBadge = m.href === "/announcements" && unread > 0;
             return (
               <Link
                 key={m.href}
                 href={m.href}
                 onClick={() => setOpen(false)}
-                className={`block rounded-lg px-3 py-2 text-sm ${
+                className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm ${
                   active
                     ? "bg-indigo-50 font-medium text-indigo-700"
                     : "text-slate-700 hover:bg-slate-50"
                 }`}
               >
-                {m.label}
+                <span>{m.label}</span>
+                {showBadge && (
+                  <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1.5 text-[11px] font-medium leading-none text-white">
+                    {unread > 99 ? "99+" : unread}
+                  </span>
+                )}
               </Link>
             );
           })}
