@@ -2,159 +2,211 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getStockLevel } from "@/lib/stock";
 
+const salesStatusLabel: Record<string, string> = {
+  DRAFT: "待确认",
+  CONFIRMED: "待发货",
+  PARTIAL_SHIPPED: "部分发货",
+  SHIPPED: "已发货",
+  COMPLETED: "已完成",
+  CANCELLED: "已作废",
+};
+
+const purchaseStatusLabel: Record<string, string> = {
+  DRAFT: "待确认",
+  CONFIRMED: "待入库",
+  PARTIAL_RECEIVED: "部分入库",
+  RECEIVED: "已入库",
+  COMPLETED: "已完成",
+  CANCELLED: "已作废",
+};
+
+function money(n: number) {
+  return `¥${n.toLocaleString("zh-CN", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+}
+
 export default async function DashboardPage() {
-  const [
-    customerCount,
-    productCount,
-    orderCount,
-    employeeCount,
-    stockItems,
-    recentOrders,
-    announcements,
-  ] = await Promise.all([
-    prisma.customer.count(),
-    prisma.product.count(),
-    prisma.salesOrder.count({ where: { status: { not: "CANCELLED" } } }),
-    prisma.employee.count(),
+  const [openSales, openPurchases, stockItems, unpaidSales] = await Promise.all([
+    prisma.salesOrder.findMany({
+      where: { status: { in: ["DRAFT", "CONFIRMED", "PARTIAL_SHIPPED"] } },
+      include: { customer: true },
+      orderBy: { orderDate: "asc" },
+      take: 8,
+    }),
+    prisma.purchaseOrder.findMany({
+      where: { status: { in: ["DRAFT", "CONFIRMED", "PARTIAL_RECEIVED"] } },
+      include: { supplier: true },
+      orderBy: { orderDate: "asc" },
+      take: 8,
+    }),
     prisma.stockItem.findMany({ include: { product: true } }),
     prisma.salesOrder.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 5,
+      where: { paymentStatus: { not: "PAID" }, status: { not: "CANCELLED" } },
       include: { customer: true },
+      orderBy: { orderDate: "asc" },
     }),
-    prisma.announcement.findMany({ orderBy: { createdAt: "desc" }, take: 3 }),
   ]);
 
-  const totalStock = stockItems.reduce((s, i) => s + i.quantity, 0);
-  const criticalItems = stockItems.filter((i) => getStockLevel(i.quantity, i.product.safetyStock) === "CRITICAL");
-  const warningItems = stockItems.filter((i) => getStockLevel(i.quantity, i.product.safetyStock) === "WARNING");
+  const alerts = stockItems
+    .map((item) => ({
+      ...item,
+      level: getStockLevel(item.quantity, item.product.safetyStock),
+    }))
+    .filter((item) => item.level !== "NORMAL")
+    .sort((a, b) => (a.level === "CRITICAL" ? -1 : 1));
 
-  const unpaidOrders = await prisma.salesOrder.count({
-    where: { paymentStatus: { not: "PAID" }, status: { not: "CANCELLED" } },
+  const receivable = unpaidSales.reduce((sum, order) => sum + (order.totalAmount - order.paidAmount), 0);
+  const salesOpenCount = await prisma.salesOrder.count({
+    where: { status: { in: ["DRAFT", "CONFIRMED", "PARTIAL_SHIPPED"] } },
+  });
+  const purchaseOpenCount = await prisma.purchaseOrder.count({
+    where: { status: { in: ["DRAFT", "CONFIRMED", "PARTIAL_RECEIVED"] } },
   });
 
-  const cards = [
-    { label: "客户数", value: customerCount, bg: "bg-blue-500", light: "bg-blue-50" },
-    { label: "商品数", value: productCount, bg: "bg-slate-500", light: "bg-slate-100" },
-    { label: "销售订单", value: orderCount, bg: "bg-emerald-500", light: "bg-emerald-50" },
-    { label: "库存总量", value: totalStock, bg: "bg-indigo-500", light: "bg-indigo-50" },
-    { label: "未收款", value: unpaidOrders, bg: "bg-amber-500", light: "bg-amber-50" },
-  ];
+  const today = new Date().toLocaleDateString("zh-CN", {
+    month: "long",
+    day: "numeric",
+    weekday: "short",
+  });
+
+  const todoCount = salesOpenCount + purchaseOpenCount + alerts.length + (receivable > 0 ? 1 : 0);
 
   return (
-    <div className="mx-auto max-w-6xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-slate-900">工作台</h1>
-        <p className="mt-1 text-sm text-slate-500">通用企业管理系统</p>
+    <div className="mx-auto w-full max-w-6xl">
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-900">工作台</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            {todoCount > 0 ? `今天有 ${todoCount} 件事要处理` : "今天没有待处理事项"}
+          </p>
+        </div>
+        <div className="text-sm text-slate-400">{today}</div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
-        {cards.map((card) => (
-          <div key={card.label} className={`rounded-2xl border border-slate-200 ${card.light} p-5 shadow-sm`}>
-            <div className="text-xs font-medium text-slate-600">{card.label}</div>
-            <div className={`mt-2 text-3xl font-bold text-white ${card.bg} inline-block rounded-lg px-3 py-1`}>
-              {card.value}
-            </div>
+      <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <Link href="/sales" className="rounded-2xl border border-slate-200 bg-white p-4 hover:border-indigo-200">
+          <div className="text-xs text-slate-500">待发货</div>
+          <div className="mt-2 text-3xl font-semibold text-indigo-600">{salesOpenCount}</div>
+          <div className="mt-1 text-xs text-slate-400">销售订单还没出去</div>
+        </Link>
+        <Link href="/purchases" className="rounded-2xl border border-slate-200 bg-white p-4 hover:border-emerald-200">
+          <div className="text-xs text-slate-500">待入库</div>
+          <div className="mt-2 text-3xl font-semibold text-emerald-600">{purchaseOpenCount}</div>
+          <div className="mt-1 text-xs text-slate-400">采购还没回来</div>
+        </Link>
+        <Link href="/inventory" className="rounded-2xl border border-slate-200 bg-white p-4 hover:border-rose-200">
+          <div className="text-xs text-slate-500">库存预警</div>
+          <div className={`mt-2 text-3xl font-semibold ${alerts.length ? "text-rose-600" : "text-slate-900"}`}>
+            {alerts.length}
           </div>
-        ))}
+          <div className="mt-1 text-xs text-slate-400">低于安全库存</div>
+        </Link>
+        <Link href="/finance" className="rounded-2xl border border-slate-200 bg-white p-4 hover:border-amber-200">
+          <div className="text-xs text-slate-500">应收未收</div>
+          <div className={`mt-2 text-3xl font-semibold ${receivable > 0 ? "text-amber-600" : "text-slate-900"}`}>
+            {money(receivable)}
+          </div>
+          <div className="mt-1 text-xs text-slate-400">{unpaidSales.length} 张单还没收齐</div>
+        </Link>
       </div>
 
-      {/* 库存预警 */}
-      {(criticalItems.length > 0 || warningItems.length > 0) && (
-        <div className="mt-5 grid gap-3 md:grid-cols-2">
-          {criticalItems.length > 0 && (
-            <div className="rounded-2xl border border-rose-300 bg-rose-50 p-4">
-              <div className="text-sm font-medium text-rose-800">严重不足 ({criticalItems.length})</div>
-              <div className="mt-2 space-y-1">
-                {criticalItems.slice(0, 3).map((item) => (
-                  <div key={item.id} className="text-xs text-rose-700">
-                    {item.product.name} — 当前 {item.quantity} / 安全 {item.product.safetyStock}
-                  </div>
-                ))}
+      <section className="mt-5 rounded-2xl border border-slate-200 bg-white">
+        <div className="border-b border-slate-100 px-5 py-3 text-sm font-medium text-slate-900">先看这些
+        </div>
+        <div className="divide-y divide-slate-100">
+          {alerts.slice(0, 3).map((item) => (
+            <Link key={item.id} href="/inventory" className="flex items-center gap-3 px-5 py-3 hover:bg-slate-50">
+              <span className={`h-2 w-2 shrink-0 rounded-full ${item.level === "CRITICAL" ? "bg-rose-500" : "bg-amber-500"}`} />
+              <div className="min-w-0 flex-1">
+                <div className="text-sm text-slate-900">{item.product.name}</div>
+                <div className="text-xs text-slate-500">
+                  库存 {item.quantity} · 安全库存 {item.product.safetyStock}
+                </div>
               </div>
-              <Link href="/inventory" className="mt-2 inline-block text-xs text-rose-700 underline">
-                查看库存
-              </Link>
-            </div>
-          )}
-          {warningItems.length > 0 && (
-            <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4">
-              <div className="text-sm font-medium text-amber-800">低库存警告 ({warningItems.length})</div>
-              <div className="mt-2 space-y-1">
-                {warningItems.slice(0, 3).map((item) => (
-                  <div key={item.id} className="text-xs text-amber-700">
-                    {item.product.name} — 当前 {item.quantity} / 安全 {item.product.safetyStock}
-                  </div>
-                ))}
+              <span className={`rounded-full px-2 py-0.5 text-xs ${item.level === "CRITICAL" ? "bg-rose-50 text-rose-700" : "bg-amber-50 text-amber-700"}`}>
+                {item.level === "CRITICAL" ? "严重不足" : "低库存"}
+              </span>
+            </Link>
+          ))}
+          {openSales.slice(0, 3).map((order) => (
+            <Link key={order.id} href="/sales" className="flex items-center gap-3 px-5 py-3 hover:bg-slate-50">
+              <span className="h-2 w-2 shrink-0 rounded-full bg-indigo-500" />
+              <div className="min-w-0 flex-1">
+                <div className="text-sm text-slate-900">
+                  {order.orderNo}
+                  <span className="ml-2 text-slate-500">{order.customer.name}</span>
+                </div>
+                <div className="text-xs text-slate-500">销售 {money(order.totalAmount)}</div>
               </div>
-              <Link href="/inventory" className="mt-2 inline-block text-xs text-amber-700 underline">
-                查看库存
-              </Link>
-            </div>
+              <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700">
+                {salesStatusLabel[order.status] || order.status}
+              </span>
+            </Link>
+          ))}
+          {openPurchases.slice(0, 3).map((order) => (
+            <Link key={order.id} href="/purchases" className="flex items-center gap-3 px-5 py-3 hover:bg-slate-50">
+              <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
+              <div className="min-w-0 flex-1">
+                <div className="text-sm text-slate-900">
+                  {order.orderNo}
+                  <span className="ml-2 text-slate-500">{order.supplier.name}</span>
+                </div>
+                <div className="text-xs text-slate-500">采购 {money(order.totalAmount)}</div>
+              </div>
+              <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700">
+                {purchaseStatusLabel[order.status] || order.status}
+              </span>
+            </Link>
+          ))}
+          {todoCount === 0 && (
+            <div className="px-5 py-8 text-center text-sm text-slate-400">没有待发货、待入库、库存预警或未收款</div>
           )}
         </div>
-      )}
+      </section>
 
-      <div className="mt-6 grid gap-6 md:grid-cols-2">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-medium text-slate-900">最近销售订单</h2>
-            <Link href="/sales" className="text-xs text-indigo-600 hover:text-indigo-700">查看全部</Link>
+      <div className="mt-5 grid gap-4 lg:grid-cols-2">
+        <section className="rounded-2xl border border-slate-200 bg-white">
+          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
+            <h2 className="text-sm font-medium text-slate-900">未发货订单</h2>
+            <Link href="/sales" className="text-xs text-indigo-600">全部</Link>
           </div>
-          <div className="mt-4 space-y-3">
-            {recentOrders.map((o) => (
-              <div key={o.id} className="flex items-center justify-between text-sm">
+          <div className="divide-y divide-slate-100">
+            {openSales.length === 0 && <div className="px-5 py-6 text-sm text-slate-400">没有待发货</div>}
+            {openSales.map((order) => (
+              <div key={order.id} className="flex items-center justify-between px-5 py-3 text-sm">
                 <div>
-                  <div className="font-medium text-slate-900">{o.orderNo}</div>
-                  <div className="text-xs text-slate-500">{o.customer.name}</div>
+                  <div className="font-medium text-slate-900">{order.customer.name}</div>
+                  <div className="text-xs text-slate-400">{order.orderNo}</div>
                 </div>
                 <div className="text-right">
-                  <div className="font-medium text-emerald-600">¥{o.totalAmount.toFixed(2)}</div>
-                  <div className="text-xs text-slate-400">{o.status}</div>
+                  <div className="font-medium text-slate-900">{money(order.totalAmount)}</div>
+                  <div className="text-xs text-slate-400">{salesStatusLabel[order.status]}</div>
                 </div>
               </div>
             ))}
-            {recentOrders.length === 0 && (
-              <div className="py-4 text-center text-sm text-slate-400">暂无订单</div>
-            )}
           </div>
-        </div>
+        </section>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-medium text-slate-900">最新公告</h2>
-            <Link href="/announcements" className="text-xs text-indigo-600 hover:text-indigo-700">查看全部</Link>
+        <section className="rounded-2xl border border-slate-200 bg-white">
+          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
+            <h2 className="text-sm font-medium text-slate-900">未入库采购</h2>
+            <Link href="/purchases" className="text-xs text-indigo-600">全部</Link>
           </div>
-          <div className="mt-4 space-y-3">
-            {announcements.map((a) => (
-              <div key={a.id}>
-                <div className="text-sm font-medium text-slate-900">{a.title}</div>
-                <div className="mt-0.5 text-xs text-slate-500 line-clamp-2">{a.content}</div>
+          <div className="divide-y divide-slate-100">
+            {openPurchases.length === 0 && <div className="px-5 py-6 text-sm text-slate-400">没有待入库</div>}
+            {openPurchases.map((order) => (
+              <div key={order.id} className="flex items-center justify-between px-5 py-3 text-sm">
+                <div>
+                  <div className="font-medium text-slate-900">{order.supplier.name}</div>
+                  <div className="text-xs text-slate-400">{order.orderNo}</div>
+                </div>
+                <div className="text-right">
+                  <div className="font-medium text-slate-900">{money(order.totalAmount)}</div>
+                  <div className="text-xs text-slate-400">{purchaseStatusLabel[order.status]}</div>
+                </div>
               </div>
             ))}
-            {announcements.length === 0 && (
-              <div className="py-4 text-center text-sm text-slate-400">暂无公告</div>
-            )}
           </div>
-        </div>
-      </div>
-
-      <div className="mt-6">
-        <h2 className="text-base font-medium text-slate-900">快捷操作</h2>
-        <div className="mt-3 flex flex-wrap gap-3">
-          <Link href="/sales/new" className="rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700">
-            新建销售订单
-          </Link>
-          <Link href="/purchases/new" className="rounded-lg bg-emerald-600 px-4 py-2 text-sm text-white hover:bg-emerald-700">
-            新建采购订单
-          </Link>
-          <Link href="/inventory" className="rounded-lg bg-amber-500 px-4 py-2 text-sm text-white hover:bg-amber-600">
-            库存入出库
-          </Link>
-          <Link href="/customers/new" className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
-            新建客户
-          </Link>
-        </div>
+        </section>
       </div>
     </div>
   );
