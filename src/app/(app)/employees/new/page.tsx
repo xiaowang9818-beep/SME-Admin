@@ -2,7 +2,7 @@ import { createEmployee } from "./actions";
 
 export default function NewEmployeePage() {
   return (
-    <div className="max-w-2xl">
+    <div className="mx-auto max-w-2xl">
       <h1 className="text-2xl font-semibold text-slate-900">新建员工</h1>
       <p className="mt-1 text-sm text-slate-500">填写员工基本信息</p>
 

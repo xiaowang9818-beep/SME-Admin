@@ -57,7 +57,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <button onClick={() => setOpen(true)} className="text-sm text-slate-700">菜单</button>
           <span className="ml-3 text-sm font-medium text-slate-900">通用企业管理系统</span>
         </header>
-        <main className="p-6">{children}</main>
+        <main className="flex justify-center p-6">
+          <div className="w-full max-w-4xl">{children}</div>
+        </main>
       </div>
     </div>
   );

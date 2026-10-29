@@ -23,7 +23,7 @@ export default async function DashboardPage() {
   ];
 
   return (
-    <div className="max-w-6xl">
+    <div className="mx-auto max-w-5xl">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-slate-900">工作台</h1>
         <p className="mt-1 text-sm text-slate-500">通用企业管理系统</p>

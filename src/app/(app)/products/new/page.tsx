@@ -2,7 +2,7 @@ import { createProduct } from "./actions";
 
 export default function NewProductPage() {
   return (
-    <div className="max-w-2xl">
+    <div className="mx-auto max-w-2xl">
       <h1 className="text-2xl font-semibold text-slate-900">新建商品</h1>
       <p className="mt-1 text-sm text-slate-500">填写商品基本信息</p>
 
