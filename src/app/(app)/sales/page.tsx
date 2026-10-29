@@ -9,14 +9,14 @@ export default async function SalesPage() {
   });
 
   return (
-    <div>
+    <div className="mx-auto max-w-6xl">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-slate-900">销售订单</h1>
         <div className="flex gap-2">
           <a href="/api/export/sales" className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
             导出 Excel
           </a>
-          <Link href="/sales/new" className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
+          <Link href="/sales/new" className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">
             新建订单
           </Link>
         </div>
@@ -39,13 +39,13 @@ export default async function SalesPage() {
               <tr key={o.id} className="border-b border-slate-100 last:border-0">
                 <td className="px-4 py-3 font-mono text-xs text-slate-500">{o.orderNo}</td>
                 <td className="px-4 py-3 text-slate-900">{o.customer.name}</td>
-                <td className="px-4 py-3 font-medium">¥{o.totalAmount.toFixed(2)}</td>
+                <td className="px-4 py-3 font-medium text-emerald-600">¥{o.totalAmount.toFixed(2)}</td>
                 <td className="px-4 py-3">
                   <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700">{o.status}</span>
                 </td>
                 <td className="px-4 py-3">
-                  <span className={`rounded-full px-2 py-0.5 text-xs ${o.paymentStatus === "PAID" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>
-                    {o.paymentStatus}
+                  <span className={`rounded-full px-2 py-0.5 text-xs ${o.paymentStatus === "PAID" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
+                    {o.paymentStatus === "PAID" ? "已收款" : "未收款"}
                   </span>
                 </td>
                 <td className="px-4 py-3 space-x-3">
@@ -71,11 +71,7 @@ export default async function SalesPage() {
               </tr>
             ))}
             {orders.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-sm text-slate-400">
-                  暂无销售订单
-                </td>
-              </tr>
+              <tr><td colSpan={6} className="px-4 py-10 text-center text-sm text-slate-400">暂无销售订单</td></tr>
             )}
           </tbody>
         </table>
