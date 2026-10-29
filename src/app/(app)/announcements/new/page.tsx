@@ -17,8 +17,9 @@ export default function NewAnnouncementPage() {
           <textarea
             name="content"
             required
-            placeholder="公告内容"
-            className="mt-1.5 min-h-[120px] w-full resize-y rounded-lg border border-indigo-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-400"
+            placeholder="公告内容（可拖动右下角调整大小）"
+            style={{ resize: "vertical", minHeight: "160px" }}
+            className="mt-1.5 w-full rounded-lg border border-indigo-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-400"
           />
         </div>
 
