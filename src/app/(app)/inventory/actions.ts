@@ -4,35 +4,37 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
 export async function adjustStock(formData: FormData) {
-  const productId = String(formData.get("productId") || "");
-  const warehouseId = String(formData.get("warehouseId") || "");
-  const quantity = Number(formData.get("quantity") || 0);
-  if (!productId || !warehouseId || quantity === 0) return;
+  const stockItemId = String(formData.get("stockItemId") || "");
+  const qtyStr = String(formData.get("quantity") || "");
+  const quantity = parseInt(qtyStr, 10);
 
-  const existing = await prisma.stockItem.findUnique({
-    where: { productId_warehouseId: { productId, warehouseId } },
+  if (!stockItemId || isNaN(quantity)) return;
+
+  const item = await prisma.stockItem.findUnique({
+    where: { id: stockItemId },
+    include: { product: true },
+  });
+  if (!item) return;
+
+  const diff = quantity - item.quantity;
+
+  await prisma.stockItem.update({
+    where: { id: stockItemId },
+    data: { quantity },
   });
 
-  if (existing) {
-    await prisma.stockItem.update({
-      where: { id: existing.id },
-      data: { quantity: existing.quantity + quantity },
-    });
-  } else {
-    await prisma.stockItem.create({
-      data: { productId, warehouseId, quantity: Math.max(0, quantity) },
+  if (diff !== 0) {
+    await prisma.stockMove.create({
+      data: {
+        productId: item.productId,
+        warehouseId: item.warehouseId,
+        type: "ADJUST",
+        quantity: Math.abs(diff),
+        remark: `手动调整 ${item.quantity} → ${quantity}`,
+      },
     });
   }
 
-  await prisma.stockMove.create({
-    data: {
-      productId,
-      warehouseId,
-      type: quantity > 0 ? "IN" : "OUT",
-      quantity: Math.abs(quantity),
-      remark: "手动调整",
-    },
-  });
-
   revalidatePath("/inventory");
+  revalidatePath("/dashboard");
 }
